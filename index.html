@@ -3,1191 +3,408 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>🍛 Food Fight Trivia</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
+<title>Food Fight Trivia</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 <style>
-  /* ── RESET & BASE ── */
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --bg:        #0f0f14;
-    --surface:   #1a1a24;
-    --surface2:  #23232f;
-    --border:    #2e2e3e;
-    --text:      #f0eee8;
-    --muted:     #8884a0;
-    --aus:       #f5a623;
-    --aus-dim:   #3a2a0a;
-    --nz:        #4caf72;
-    --nz-dim:    #0a2e18;
-    --accent:    #c084fc;
-    --accent-dim:#2a1040;
-    --red:       #f87171;
-    --green:     #4ade80;
-    --radius:    12px;
-    --radius-lg: 18px;
-  }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    font-size: 16px;
-    line-height: 1.6;
-  }
-
-  h1, h2, h3 { font-family: 'Syne', sans-serif; line-height: 1.2; }
-
-  /* ── NAV ── */
-  nav {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 24px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    position: sticky; top: 0; z-index: 100;
-  }
-  .nav-logo { font-family: 'Syne', sans-serif; font-size: 18px; font-weight: 800; color: var(--text); flex: 1; }
-  .nav-logo span { color: var(--accent); }
-  .nav-btn {
-    padding: 7px 18px;
-    border-radius: 8px;
-    border: 1px solid var(--border);
-    background: transparent;
-    color: var(--muted);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    cursor: pointer;
-    transition: all .2s;
-  }
-  .nav-btn:hover { background: var(--surface2); color: var(--text); }
-  .nav-btn.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-
-  /* ── PAGES ── */
-  .page { display: none; padding: 28px 24px; max-width: 860px; margin: 0 auto; }
-  .page.active { display: block; }
-
-  /* ── QUIZ PAGE ── */
-  .score-bar {
-    display: grid;
-    grid-template-columns: minmax(0,1fr) auto minmax(0,1fr);
-    gap: 12px;
-    align-items: center;
-    margin-bottom: 24px;
-  }
-  .team-score {
-    padding: 16px 20px;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border);
-    min-width: 0;
-    overflow: hidden;
-  }
-  .team-score.team-a { border-color: var(--aus); background: var(--aus-dim); }
-  .team-score.team-b { border-color: var(--nz); background: var(--nz-dim); text-align: right; }
-  .team-score .label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin-bottom: 2px; }
-  .team-score .pts {
-    font-family: 'DM Mono', 'Courier New', monospace;
-    font-size: 48px;
-    font-weight: 500;
-    display: block;
-    line-height: 1;
-    letter-spacing: -2px;
-    white-space: nowrap;
-    writing-mode: horizontal-tb;
-    text-orientation: mixed;
-  }
-  .team-score.team-a .pts { color: var(--aus); }
-  .team-score.team-b .pts { color: var(--nz); }
-  .team-score .name { font-size: 15px; font-weight: 600; }
-  .vs-block { text-align: center; }
-  .vs-block .vs { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 800; color: var(--muted); }
-  .vs-block .q-count { font-size: 12px; color: var(--muted); margin-top: 4px; }
-
-  /* question card */
-  .q-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 28px;
-    margin-bottom: 20px;
-  }
-  .q-meta {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 16px;
-  }
-  .q-type-badge {
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: 600;
-    letter-spacing: .05em;
-  }
-  .badge-riddle  { background: #2a1a40; color: #c084fc; border: 1px solid #5b21b6; }
-  .badge-country { background: #0a2040; color: #60a5fa; border: 1px solid #1d4ed8; }
-  .badge-tf      { background: #0a2e18; color: #4ade80; border: 1px solid #166534; }
-  .badge-spicy   { background: #3a0a0a; color: #f87171; border: 1px solid #991b1b; }
-
-  .q-number { font-size: 13px; color: var(--muted); margin-left: auto; }
-
-  .q-text {
-    font-family: 'Syne', sans-serif;
-    font-size: 24px;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.35;
-    margin-bottom: 24px;
-  }
-
-  /* options grid */
-  .options-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 20px;
-  }
-  .opt-btn {
-    padding: 14px 16px;
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    background: var(--surface2);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 15px;
-    cursor: pointer;
-    text-align: left;
-    transition: all .15s;
-    position: relative;
-  }
-  .opt-btn:hover:not(:disabled) { border-color: var(--accent); background: var(--accent-dim); }
-  .opt-btn.correct  { border-color: var(--green); background: #0a2e18; color: var(--green); }
-  .opt-btn.wrong    { border-color: var(--red);   background: #2e0a0a; color: var(--red); }
-  .opt-btn:disabled { cursor: default; opacity: .7; }
-  .opt-letter {
-    display: inline-block;
-    width: 24px; height: 24px;
-    border-radius: 6px;
-    background: var(--border);
-    text-align: center;
-    line-height: 24px;
-    font-size: 12px;
-    font-weight: 700;
-    margin-right: 10px;
-    vertical-align: middle;
-  }
-
-  /* fact reveal */
-  .fact-box {
-    display: none;
-    padding: 14px 18px;
-    background: var(--surface2);
-    border-left: 3px solid var(--accent);
-    border-radius: 0 var(--radius) var(--radius) 0;
-    font-size: 14px;
-    color: var(--muted);
-    margin-bottom: 16px;
-    line-height: 1.6;
-  }
-  .fact-box strong { color: var(--text); }
-
-  /* action buttons */
-  .action-row {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-  }
-  .btn {
-    padding: 10px 22px;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-    background: var(--surface2);
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: all .15s;
-  }
-  .btn:hover { background: var(--surface); border-color: var(--muted); }
-  .btn-reveal { border-color: var(--accent); color: var(--accent); }
-  .btn-reveal:hover { background: var(--accent-dim); }
-  .btn-a { border-color: var(--aus); color: var(--aus); }
-  .btn-a:hover { background: var(--aus-dim); }
-  .btn-b { border-color: var(--nz); color: var(--nz); }
-  .btn-b:hover { background: var(--nz-dim); }
-  .btn-next { background: var(--accent); border-color: var(--accent); color: #fff; }
-  .btn-next:hover { opacity: .85; }
-  .btn-danger { border-color: var(--red); color: var(--red); }
-  .btn-danger:hover { background: #2e0a0a; }
-
-  /* point awarded flash */
-  .point-flash {
-    padding: 6px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    font-weight: 600;
-    display: none;
-    animation: pop .4s ease;
-  }
-  .point-flash.a { background: var(--aus-dim); color: var(--aus); border: 1px solid var(--aus); }
-  .point-flash.b { background: var(--nz-dim);  color: var(--nz);  border: 1px solid var(--nz); }
-  @keyframes pop { 0%{transform:scale(.8);opacity:0} 60%{transform:scale(1.1)} 100%{transform:scale(1);opacity:1} }
-
-  /* timer */
-  .timer-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; }
-  .timer-ring {
-    width: 44px; height: 44px;
-    border-radius: 50%;
-    border: 3px solid var(--accent);
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif;
-    font-size: 16px;
-    font-weight: 800;
-    color: var(--accent);
-    flex-shrink: 0;
-    transition: border-color .3s, color .3s;
-  }
-  .timer-ring.urgent { border-color: var(--red); color: var(--red); }
-  .timer-bar-wrap { flex: 1; height: 5px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
-  .timer-bar { height: 100%; background: var(--accent); border-radius: 3px; transition: width 1s linear, background .3s; }
-  .timer-bar.urgent { background: var(--red); }
-
-  /* game over */
-  #game-over {
-    display: none;
-    text-align: center;
-    padding: 48px 24px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-  }
-  #game-over .winner-emoji { font-size: 64px; display: block; margin-bottom: 16px; }
-  #game-over h2 { font-size: 36px; margin-bottom: 8px; }
-  #game-over .final-scores { display: flex; gap: 24px; justify-content: center; margin: 24px 0; }
-  #game-over .fs-team { padding: 20px 36px; border-radius: var(--radius-lg); }
-  #game-over .fs-team.a { background: var(--aus-dim); border: 1px solid var(--aus); }
-  #game-over .fs-team.b { background: var(--nz-dim);  border: 1px solid var(--nz); }
-  #game-over .fs-pts { font-family: 'DM Mono', 'Courier New', monospace; font-size: 52px; font-weight: 500; display: block; line-height: 1; letter-spacing: -2px; }
-  #game-over .fs-team.a .fs-pts { color: var(--aus); }
-  #game-over .fs-team.b .fs-pts { color: var(--nz); }
-  #game-over .fs-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
-
-  /* ── ADMIN PAGE ── */
-  .admin-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 12px;
-  }
-  .admin-header h2 { font-size: 26px; }
-
-  .sheets-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px 18px;
-    margin-bottom: 20px;
-  }
-  .sheets-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
-  .sheets-label { font-size: 14px; font-weight: 600; color: var(--text); }
-  .btn-sm-link { background: none; border: none; color: var(--accent); font-family: 'DM Sans', sans-serif; font-size: 13px; cursor: pointer; padding: 0; }
-  .btn-sm-link:hover { text-decoration: underline; }
-  .sheets-input-row { display: flex; gap: 10px; align-items: center; }
-  .sheets-input-row input {
-    flex: 1;
-    padding: 9px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-  }
-  .sheets-input-row input:focus { border-color: var(--accent); }
-  .sheets-input-row input::placeholder { color: var(--muted); }
-
-  .help-box { background: var(--surface2); border-radius: var(--radius); padding: 16px; margin-bottom: 14px; border: 1px solid var(--border); }
-  .help-table-wrap { overflow-x: auto; margin-bottom: 14px; }
-  .help-table { border-collapse: collapse; font-size: 12px; white-space: nowrap; }
-  .help-table th { background: var(--border); color: var(--text); padding: 6px 10px; text-align: left; font-weight: 700; letter-spacing: .04em; }
-  .help-table td { padding: 5px 10px; color: var(--muted); border-bottom: 1px solid var(--border); }
-  .help-table tr:last-child td { border-bottom: none; }
-  .help-steps { display: flex; flex-direction: column; gap: 7px; }
-  .help-step { display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
-  .step-num { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%; background: var(--accent-dim); border: 1px solid var(--accent); color: var(--accent); font-size: 11px; font-weight: 700; flex-shrink: 0; margin-top: 1px; }
-  .help-step code { background: var(--border); padding: 1px 5px; border-radius: 4px; font-size: 12px; color: var(--text); font-family: monospace; }
-
-  /* question list */
-  .q-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
-  .q-item {
-    display: flex;
-    align-items: flex-start;
-    gap: 14px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 14px 16px;
-    transition: border-color .15s;
-  }
-  .q-item:hover { border-color: var(--muted); }
-  .q-item.selected { border-color: var(--accent); background: var(--accent-dim); }
-  .q-checkbox {
-    width: 20px; height: 20px;
-    border: 2px solid var(--border);
-    border-radius: 5px;
-    flex-shrink: 0;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    margin-top: 2px;
-    transition: all .15s;
-  }
-  .q-item.selected .q-checkbox { background: var(--accent); border-color: var(--accent); }
-  .q-item.selected .q-checkbox::after { content: '✓'; color: #fff; font-size: 12px; font-weight: 700; }
-  .q-body { flex: 1; min-width: 0; }
-  .q-body .q-preview { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-  .q-body .q-answer { font-size: 13px; color: var(--muted); }
-  .q-body .q-answer span { color: var(--green); font-weight: 600; }
-  .q-actions { display: flex; gap: 6px; flex-shrink: 0; }
-  .icon-btn {
-    width: 30px; height: 30px;
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    background: var(--surface2);
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 14px;
-    display: flex; align-items: center; justify-content: center;
-    transition: all .15s;
-  }
-  .icon-btn:hover { border-color: var(--red); color: var(--red); background: #2e0a0a; }
-
-  /* add question form */
-  .add-form {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 22px;
-    margin-bottom: 20px;
-  }
-  .add-form h3 { font-size: 18px; margin-bottom: 16px; color: var(--accent); }
-  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
-  .form-group { display: flex; flex-direction: column; gap: 6px; }
-  .form-group.full { grid-column: 1 / -1; }
-  .form-group label { font-size: 13px; color: var(--muted); font-weight: 500; }
-  .form-group input, .form-group select, .form-group textarea {
-    padding: 9px 12px;
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    color: var(--text);
-    font-family: 'DM Sans', sans-serif;
-    font-size: 14px;
-    outline: none;
-    resize: vertical;
-  }
-  .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--accent); }
-  .form-group select option { background: var(--surface2); }
-
-  .admin-toolbar {
-    display: flex;
-    gap: 10px;
-    flex-wrap: wrap;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  .count-badge {
-    margin-left: auto;
-    font-size: 13px;
-    color: var(--muted);
-    background: var(--surface2);
-    padding: 5px 12px;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-  }
-  .count-badge span { color: var(--accent); font-weight: 700; }
-
-  /* team name inputs in quiz setup */
-  .setup-bar {
-    display: grid;
-    grid-template-columns: 1fr 1fr auto;
-    gap: 12px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-bottom: 20px;
-    align-items: end;
-  }
-  .setup-bar .form-group label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
-
-  /* empty state */
-  .empty-state {
-    text-align: center;
-    padding: 40px;
-    color: var(--muted);
-    font-size: 15px;
-  }
-  .empty-state .big { font-size: 40px; margin-bottom: 12px; display: block; }
-
-  /* time expired prompt */
-  .time-up-box {
-    padding: 14px 18px;
-    background: #2e1a0a;
-    border: 1px solid var(--red);
-    border-radius: var(--radius);
-    margin-bottom: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .time-up-icon { font-size: 22px; }
-  .time-up-text { font-size: 15px; font-weight: 600; color: var(--red); }
-
-  /* scrollbar */
-  ::-webkit-scrollbar { width: 6px; }
-  ::-webkit-scrollbar-track { background: var(--bg); }
-  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--cream:#FFF8EE;--paper:#FFF2DC;--ink:#1C1A16;--muted:#6B6555;--border:#DDD0B8;--aus:#E8780C;--aus-bg:#FDF0E0;--nz:#1D8A4E;--nz-bg:#E4F5EC;--blue:#2563EB;--blue-bg:#EFF6FF;--purple:#7C3AED;--purp-bg:#F5F0FF;--green:#059669;--red:#DC2626;--radius:10px;--radius-lg:16px;}
+body{font-family:'Nunito',sans-serif;background:var(--cream);color:var(--ink);min-height:100vh;}
+nav{display:flex;align-items:center;gap:8px;padding:12px 24px;background:var(--ink);border-bottom:3px solid var(--aus);position:sticky;top:0;z-index:200;}
+.nav-logo{font-family:'Bebas Neue',sans-serif;font-size:26px;letter-spacing:2px;color:#fff;flex:1;}
+.nav-logo span{color:var(--aus);}
+.nav-btn{padding:6px 18px;border-radius:6px;border:2px solid #444;background:transparent;color:#aaa;font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;transition:all .2s;}
+.nav-btn:hover{border-color:#888;color:#fff;}
+.nav-btn.active{background:var(--aus);border-color:var(--aus);color:#fff;}
+.page{display:none;padding:24px 20px 48px;max-width:820px;margin:0 auto;}
+.page.active{display:block;animation:fadeUp .3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.setup-bar{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;background:var(--paper);border:2px solid var(--border);border-radius:var(--radius-lg);padding:14px 16px;margin-bottom:20px;align-items:end;}
+.form-group{display:flex;flex-direction:column;gap:5px;}
+.form-group label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.form-group input,.form-group select{padding:8px 11px;border:2px solid var(--border);border-radius:8px;background:#fff;color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;font-weight:700;outline:none;transition:border-color .15s;}
+.form-group input:focus,.form-group select:focus{border-color:var(--aus);}
+.score-bar{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:center;margin-bottom:20px;}
+.team-score{padding:14px 18px;border-radius:var(--radius-lg);border:3px solid var(--border);background:#fff;min-width:0;}
+.team-score.team-a{border-color:var(--aus);background:var(--aus-bg);}
+.team-score.team-b{border-color:var(--nz);background:var(--nz-bg);text-align:right;}
+.team-score .t-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);}
+.team-score .t-name{font-size:15px;font-weight:800;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.team-score .t-pts{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;letter-spacing:1px;display:block;margin-top:2px;}
+.team-score.team-a .t-pts{color:var(--aus);}
+.team-score.team-b .t-pts{color:var(--nz);}
+.vs-block{text-align:center;flex-shrink:0;}
+.vs-block .vs{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:2px;color:var(--muted);}
+.vs-block .q-count{font-size:12px;font-weight:700;color:var(--muted);}
+.q-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);padding:24px;margin-bottom:16px;}
+.q-meta{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.q-type-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:800;letter-spacing:.04em;border:2px solid transparent;}
+.badge-riddle{background:var(--purp-bg);color:var(--purple);border-color:var(--purple);}
+.badge-country{background:var(--blue-bg);color:var(--blue);border-color:var(--blue);}
+.badge-tf{background:var(--nz-bg);color:var(--nz);border-color:var(--nz);}
+.badge-spicy{background:#FEF2F2;color:var(--red);border-color:var(--red);}
+.badge-bonus{background:#FFFBEB;color:#92400E;border-color:#F59E0B;}
+.q-number{font-size:13px;font-weight:800;color:var(--muted);margin-left:auto;}
+.q-text{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:.5px;color:var(--ink);line-height:1.25;margin-bottom:20px;}
+.options-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;}
+.opt-btn{padding:13px 14px;border:2px solid var(--border);border-radius:var(--radius);background:var(--paper);color:var(--ink);font-family:'Nunito',sans-serif;font-size:15px;font-weight:700;cursor:pointer;text-align:left;transition:all .12s;display:flex;align-items:center;gap:10px;}
+.opt-btn:hover:not(:disabled){border-color:var(--aus);background:var(--aus-bg);}
+.opt-btn.correct{border-color:var(--green);background:#ECFDF5;color:var(--green);}
+.opt-btn.wrong{border-color:var(--red);background:#FEF2F2;color:var(--red);}
+.opt-btn:disabled{cursor:default;}
+.opt-letter{display:inline-flex;align-items:center;justify-content:center;width:26px;height:26px;border-radius:6px;background:var(--border);font-size:12px;font-weight:800;flex-shrink:0;color:var(--muted);}
+.opt-btn.correct .opt-letter{background:var(--green);color:#fff;}
+.opt-btn.wrong .opt-letter{background:var(--red);color:#fff;}
+.timer-row{display:flex;align-items:center;gap:10px;margin-bottom:16px;}
+.timer-ring{width:42px;height:42px;border-radius:50%;border:3px solid var(--aus);display:flex;align-items:center;justify-content:center;font-family:'Bebas Neue',sans-serif;font-size:18px;color:var(--aus);flex-shrink:0;transition:border-color .3s,color .3s;}
+.timer-ring.urgent{border-color:var(--red);color:var(--red);}
+.timer-bar-wrap{flex:1;height:6px;background:var(--paper);border-radius:3px;overflow:hidden;border:1px solid var(--border);}
+.timer-bar{height:100%;background:var(--aus);border-radius:3px;transition:width 1s linear,background .3s;}
+.timer-bar.urgent{background:var(--red);}
+.fact-box{display:none;padding:13px 16px;background:var(--paper);border-left:4px solid var(--aus);border-radius:0 var(--radius) var(--radius) 0;font-size:14px;font-weight:600;color:var(--muted);margin-bottom:14px;line-height:1.6;}
+.fact-box strong{color:var(--ink);display:block;margin-bottom:4px;font-size:15px;}
+.time-up-box{display:none;padding:14px 16px;background:#FEF2F2;border:2px solid var(--red);border-radius:var(--radius);margin-bottom:14px;gap:10px;flex-direction:column;}
+.time-up-title{font-size:15px;font-weight:800;color:var(--red);}
+.time-up-btns{display:flex;gap:8px;flex-wrap:wrap;}
+.point-flash{padding:6px 14px;border-radius:8px;font-size:13px;font-weight:800;display:none;animation:pop .4s ease;}
+.point-flash.a{background:var(--aus-bg);color:var(--aus);border:2px solid var(--aus);}
+.point-flash.b{background:var(--nz-bg);color:var(--nz);border:2px solid var(--nz);}
+@keyframes pop{0%{transform:scale(.7);opacity:0}60%{transform:scale(1.12)}100%{transform:scale(1);opacity:1}}
+.btn{padding:9px 20px;border-radius:var(--radius);border:2px solid var(--border);background:#fff;color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;font-weight:800;cursor:pointer;transition:all .15s;letter-spacing:.3px;}
+.btn:hover{background:var(--paper);border-color:var(--muted);}
+.btn-primary{background:var(--ink);border-color:var(--ink);color:#fff;}
+.btn-primary:hover{background:#333;}
+.btn-reveal{background:var(--purple);border-color:var(--purple);color:#fff;}
+.btn-reveal:hover{opacity:.85;}
+.btn-a{background:var(--aus);border-color:var(--aus);color:#fff;}
+.btn-a:hover{opacity:.85;}
+.btn-b{background:var(--nz);border-color:var(--nz);color:#fff;}
+.btn-b:hover{opacity:.85;}
+.btn-next{background:var(--ink);border-color:var(--ink);color:#fff;}
+.btn-skip{color:var(--muted);}
+.btn:disabled{opacity:.45;cursor:default;}
+.btn-danger{border-color:var(--red);color:var(--red);}
+.btn-danger:hover{background:#FEF2F2;}
+.action-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;}
+.bonus-banner{display:none;background:linear-gradient(135deg,#92400E 0%,#D97706 100%);border-radius:var(--radius-lg);padding:18px 24px;margin-bottom:20px;color:#fff;text-align:center;animation:fadeUp .3s ease;}
+.bonus-banner .bb-title{font-family:'Bebas Neue',sans-serif;font-size:34px;letter-spacing:2px;display:block;}
+.bonus-banner .bb-sub{font-size:13px;font-weight:700;opacity:.85;}
+#game-over{display:none;text-align:center;padding:40px 24px;background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);animation:fadeUp .4s ease;}
+#game-over .winner-emoji{font-size:64px;display:block;margin-bottom:12px;}
+#game-over h2{font-family:'Bebas Neue',sans-serif;font-size:42px;letter-spacing:2px;margin-bottom:6px;}
+#game-over .final-scores{display:flex;gap:16px;justify-content:center;margin:20px 0;flex-wrap:wrap;}
+#game-over .fs-team{padding:18px 32px;border-radius:var(--radius-lg);border:3px solid var(--border);min-width:130px;}
+#game-over .fs-team.a{background:var(--aus-bg);border-color:var(--aus);}
+#game-over .fs-team.b{background:var(--nz-bg);border-color:var(--nz);}
+#game-over .fs-pts{font-family:'Bebas Neue',sans-serif;font-size:56px;line-height:1;display:block;}
+#game-over .fs-team.a .fs-pts{color:var(--aus);}
+#game-over .fs-team.b .fs-pts{color:var(--nz);}
+#game-over .fs-label{font-size:13px;font-weight:800;color:var(--muted);margin-top:4px;}
+#confetti-canvas{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:9999;}
+.admin-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+.admin-header h2{font-family:'Bebas Neue',sans-serif;font-size:28px;letter-spacing:1px;}
+.sheets-card{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px;margin-bottom:18px;}
+.sheets-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:10px;}
+.sheets-label{font-size:14px;font-weight:800;}
+.btn-sm-link{background:none;border:none;color:var(--blue);font-family:'Nunito',sans-serif;font-size:13px;font-weight:700;cursor:pointer;padding:0;}
+.btn-sm-link:hover{text-decoration:underline;}
+.sheets-input-row{display:flex;gap:10px;align-items:center;}
+.sheets-input-row input{flex:1;padding:9px 12px;border:2px solid var(--border);border-radius:8px;background:var(--paper);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;}
+.sheets-input-row input:focus{border-color:var(--aus);}
+.sheets-input-row input::placeholder{color:var(--muted);}
+.help-box{background:var(--paper);border-radius:var(--radius);padding:14px;margin-bottom:12px;border:1px solid var(--border);}
+.help-table-wrap{overflow-x:auto;margin-bottom:12px;}
+.help-table{border-collapse:collapse;font-size:12px;white-space:nowrap;}
+.help-table th{background:var(--ink);color:#fff;padding:6px 10px;text-align:left;font-weight:700;}
+.help-table td{padding:5px 10px;color:var(--muted);border-bottom:1px solid var(--border);font-size:12px;}
+.help-steps{display:flex;flex-direction:column;gap:6px;}
+.help-step{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:600;color:var(--muted);line-height:1.5;}
+.step-num{display:inline-flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:var(--aus);color:#fff;font-size:11px;font-weight:800;flex-shrink:0;}
+.help-step code{background:var(--border);padding:1px 5px;border-radius:4px;font-size:11px;font-family:monospace;color:var(--ink);}
+.add-form{background:#fff;border:2px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:18px;}
+.add-form h3{font-family:'Bebas Neue',sans-serif;font-size:22px;letter-spacing:1px;margin-bottom:14px;color:var(--aus);}
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.form-group.full{grid-column:1/-1;}
+.form-group textarea{padding:9px 12px;border:2px solid var(--border);border-radius:8px;background:var(--paper);color:var(--ink);font-family:'Nunito',sans-serif;font-size:14px;font-weight:600;outline:none;resize:vertical;}
+.form-group textarea:focus{border-color:var(--aus);}
+.admin-toolbar{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.count-badge{margin-left:auto;font-size:13px;font-weight:700;color:var(--muted);background:var(--paper);padding:5px 12px;border-radius:20px;border:2px solid var(--border);}
+.count-badge span{color:var(--aus);}
+.q-list{display:flex;flex-direction:column;gap:8px;margin-bottom:20px;}
+.q-item{display:flex;align-items:flex-start;gap:12px;background:#fff;border:2px solid var(--border);border-radius:var(--radius);padding:12px 14px;cursor:pointer;transition:border-color .15s;}
+.q-item:hover{border-color:var(--muted);}
+.q-item.selected{border-color:var(--aus);background:var(--aus-bg);}
+.q-checkbox{width:20px;height:20px;border:2px solid var(--border);border-radius:5px;flex-shrink:0;display:flex;align-items:center;justify-content:center;margin-top:2px;}
+.q-item.selected .q-checkbox{background:var(--aus);border-color:var(--aus);}
+.q-item.selected .q-checkbox::after{content:'checkmark';content:'✓';color:#fff;font-size:12px;font-weight:800;}
+.q-body{flex:1;min-width:0;}
+.q-preview{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:3px;}
+.q-answer{font-size:12px;font-weight:600;color:var(--muted);}
+.q-answer span{color:var(--green);}
+.q-actions{flex-shrink:0;}
+.icon-btn{width:28px;height:28px;border:2px solid var(--border);border-radius:6px;background:var(--paper);color:var(--muted);cursor:pointer;font-size:13px;display:flex;align-items:center;justify-content:center;}
+.icon-btn:hover{border-color:var(--red);color:var(--red);background:#FEF2F2;}
+.empty-state{text-align:center;padding:36px;color:var(--muted);font-size:15px;font-weight:700;}
+.empty-state .big{font-size:40px;margin-bottom:10px;display:block;}
+::-webkit-scrollbar{width:6px;}::-webkit-scrollbar-track{background:var(--cream);}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px;}
 </style>
 </head>
 <body>
-
+<canvas id="confetti-canvas"></canvas>
 <nav>
   <div class="nav-logo">🍛 Food <span>Fight</span></div>
   <button class="nav-btn active" id="nav-quiz" onclick="showPage('quiz')">🎮 Quiz</button>
   <button class="nav-btn" id="nav-admin" onclick="showPage('admin')">⚙️ Configure</button>
 </nav>
 
-<!-- ══════════════════════════════════════════
-     QUIZ PAGE
-══════════════════════════════════════════ -->
 <div class="page active" id="page-quiz">
-
-  <!-- Team name + timer setup -->
   <div class="setup-bar">
-    <div class="form-group">
-      <label>🟠 Team A name</label>
-      <input type="text" id="team-a-name" value="Australia" maxlength="20" oninput="updateTeamNames()">
-    </div>
-    <div class="form-group">
-      <label>🟢 Team B name</label>
-      <input type="text" id="team-b-name" value="New Zealand" maxlength="20" oninput="updateTeamNames()">
-    </div>
-    <div class="form-group">
-      <label>⏱ Timer per question</label>
+    <div class="form-group"><label>🟠 Team A</label><input type="text" id="team-a-name" value="Australia" maxlength="20" oninput="updateTeamNames()"></div>
+    <div class="form-group"><label>🟢 Team B</label><input type="text" id="team-b-name" value="New Zealand" maxlength="20" oninput="updateTeamNames()"></div>
+    <div class="form-group"><label>⏱ Timer</label>
       <select id="timer-duration">
-        <option value="10">10 seconds</option>
-        <option value="15" selected>15 seconds</option>
-        <option value="20">20 seconds</option>
-        <option value="30">30 seconds</option>
-        <option value="45">45 seconds</option>
-        <option value="0">No timer</option>
+        <option value="10">10 sec</option><option value="15" selected>15 sec</option><option value="20">20 sec</option><option value="30">30 sec</option><option value="45">45 sec</option><option value="0">No timer</option>
+      </select>
+    </div>
+    <div class="form-group"><label>❓ Questions</label>
+      <select id="q-count-select">
+        <option value="4">4 questions</option><option value="8" selected>8 questions</option><option value="12">12 questions</option><option value="16">16 questions</option><option value="0">All selected</option>
       </select>
     </div>
   </div>
 
-  <!-- Scores -->
   <div class="score-bar">
-    <div class="team-score team-a">
-      <div class="label">Team A</div>
-      <div class="name" id="display-a">Australia</div>
-      <div class="pts" id="pts-a">0</div>
-    </div>
-    <div class="vs-block">
-      <div class="vs">VS</div>
-      <div class="q-count" id="q-progress">Q 0 / 0</div>
-    </div>
-    <div class="team-score team-b">
-      <div class="label">Team B</div>
-      <div class="name" id="display-b">New Zealand</div>
-      <div class="pts" id="pts-b">0</div>
-    </div>
+    <div class="team-score team-a"><div class="t-label">Team A</div><div class="t-name" id="display-a">Australia</div><div class="t-pts" id="pts-a">0</div></div>
+    <div class="vs-block"><div class="vs">VS</div><div class="q-count" id="q-progress">–</div></div>
+    <div class="team-score team-b"><div class="t-label">Team B</div><div class="t-name" id="display-b">New Zealand</div><div class="t-pts" id="pts-b">0</div></div>
   </div>
 
-  <!-- Game over screen -->
+  <div class="bonus-banner" id="bonus-banner">
+    <span class="bb-title">⭐ BONUS ROUND!</span>
+    <span class="bb-sub">Double points — presenter awards the point based on best argument!</span>
+  </div>
+
   <div id="game-over">
     <span class="winner-emoji" id="winner-emoji">🏆</span>
     <h2 id="winner-text">Game Over!</h2>
     <div class="final-scores">
-      <div class="fs-team a">
-        <div class="fs-pts" id="final-a">0</div>
-        <div class="fs-label" id="final-a-label">Team A</div>
-      </div>
-      <div class="fs-team b">
-        <div class="fs-pts" id="final-b">0</div>
-        <div class="fs-label" id="final-b-label">Team B</div>
-      </div>
+      <div class="fs-team a"><div class="fs-pts" id="final-a">0</div><div class="fs-label" id="final-a-label">Team A</div></div>
+      <div class="fs-team b"><div class="fs-pts" id="final-b">0</div><div class="fs-label" id="final-b-label">Team B</div></div>
     </div>
-    <button class="btn btn-next" onclick="restartGame()">Play Again</button>
+    <button class="btn btn-primary" onclick="restartGame()">▶ Play Again</button>
   </div>
 
-  <!-- Question card -->
   <div id="q-card" class="q-card">
-
-    <div class="q-meta">
-      <span class="q-type-badge badge-riddle" id="q-badge">❓ What Am I?</span>
-      <span class="q-number" id="q-num">Q 1</span>
-    </div>
-
-    <div class="q-text" id="q-text">Press "Start Quiz" to begin!</div>
-
+    <div class="q-meta"><span class="q-type-badge badge-riddle" id="q-badge">❓</span><span class="q-number" id="q-num"></span></div>
+    <div class="q-text" id="q-text">Press Start Quiz to begin!</div>
     <div class="timer-row" id="timer-row" style="display:none">
       <div class="timer-ring" id="timer-ring"><span id="timer-val">15</span></div>
       <div class="timer-bar-wrap"><div class="timer-bar" id="timer-bar" style="width:100%"></div></div>
     </div>
-
     <div class="options-grid" id="options-grid"></div>
-
-    <!-- Time expired prompt — shown when timer runs out -->
-    <div id="time-up-box" style="display:none" class="time-up-box">
-      <span class="time-up-icon">⏰</span>
-      <span class="time-up-text">Time's up! What do you want to do?</span>
-      <div style="display:flex;gap:8px;margin-top:10px">
+    <div class="time-up-box" id="time-up-box">
+      <div class="time-up-title">⏰ Time's up!</div>
+      <div class="time-up-btns">
         <button class="btn btn-reveal" onclick="revealAnswer()">💡 Reveal answer</button>
-        <button class="btn" style="color:var(--muted)" onclick="skipQuestion()">Skip — no point</button>
+        <button class="btn btn-skip" onclick="skipQuestion()">Skip — no point</button>
       </div>
     </div>
-
     <div class="fact-box" id="fact-box"></div>
-
     <div class="action-row">
-      <!-- Before question starts -->
-      <button class="btn btn-next" id="btn-start" onclick="startQuiz()">▶ Start Quiz</button>
-
-      <!-- During question -->
+      <button class="btn btn-primary" id="btn-start" onclick="startQuiz()">▶ Start Quiz</button>
       <button class="btn btn-reveal" id="btn-reveal" style="display:none" onclick="revealAnswer()">💡 Reveal Answer</button>
-
-      <!-- After reveal — award points (presenter decides) -->
       <button class="btn btn-a" id="btn-award-a" style="display:none" onclick="awardPoint('a')">+1 🟠 <span id="award-a-label">Australia</span></button>
       <button class="btn btn-b" id="btn-award-b" style="display:none" onclick="awardPoint('b')">+1 🟢 <span id="award-b-label">New Zealand</span></button>
-      <button class="btn" id="btn-skip" style="display:none;color:var(--muted)" onclick="skipQuestion()">Skip →</button>
+      <button class="btn btn-skip" id="btn-skip" style="display:none" onclick="skipQuestion()">Skip →</button>
       <div class="point-flash" id="point-flash"></div>
-
-      <!-- Next — only shown after a point is awarded or question skipped -->
       <button class="btn btn-next" id="btn-next" style="display:none" onclick="nextQuestion()">Next →</button>
     </div>
   </div>
-
 </div>
 
-<!-- ══════════════════════════════════════════
-     ADMIN / CONFIGURE PAGE
-══════════════════════════════════════════ -->
 <div class="page" id="page-admin">
-
-  <div class="admin-header">
-    <h2>⚙️ Configure Questions</h2>
-    <button class="btn btn-next" onclick="showPage('quiz')">▶ Go to Quiz</button>
-  </div>
-
-  <!-- Google Sheets loader -->
+  <div class="admin-header"><h2>⚙️ Configure Questions</h2><button class="btn btn-primary" onclick="showPage('quiz')">▶ Go to Quiz</button></div>
   <div class="sheets-card">
-    <div class="sheets-top">
-      <div class="sheets-label">📊 Load questions from Google Sheets</div>
-      <button class="btn btn-sm-link" onclick="toggleSheetsHelp()">How to set up your sheet ▾</button>
-    </div>
-
+    <div class="sheets-top"><div class="sheets-label">📊 Load from Google Sheets</div><button class="btn-sm-link" onclick="toggleSheetsHelp()">How to set up your sheet ▾</button></div>
     <div id="sheets-help" style="display:none">
       <div class="help-box">
-        <p style="margin-bottom:10px;font-weight:600;color:var(--text)">Your Google Sheet must have these exact column headers in Row 1:</p>
+        <p style="margin-bottom:10px;font-weight:800">Your Google Sheet must have these exact column headers in Row 1:</p>
         <div class="help-table-wrap">
           <table class="help-table">
             <thead><tr><th>type</th><th>question</th><th>option_a</th><th>option_b</th><th>option_c</th><th>option_d</th><th>answer</th><th>fact</th></tr></thead>
             <tbody>
-              <tr><td>riddle</td><td>I'm brown and salty. What am I?</td><td>Vegemite</td><td>Marmite</td><td>Promite</td><td>Bovril</td><td>Vegemite</td><td>Made in Melbourne since 1922!</td></tr>
+              <tr><td>riddle</td><td>I'm brown and salty. What am I?</td><td>Vegemite</td><td>Marmite</td><td>Promite</td><td>Bovril</td><td>Vegemite</td><td>Made in Melbourne 1922!</td></tr>
               <tr><td>tf</td><td>True or False: Pavlova is from NZ.</td><td>True</td><td>False</td><td></td><td></td><td>TRUE</td><td>Both countries claim it.</td></tr>
-              <tr><td>spicy</td><td>Who invented the flat white?</td><td>Australia</td><td>New Zealand</td><td>Italy</td><td>Who cares</td><td>Both claim it!</td><td>Sydney 1985 vs Wellington 1989.</td></tr>
+              <tr><td>bonus</td><td>Who invented the flat white?</td><td>Australia</td><td>New Zealand</td><td>Italy</td><td>Who cares</td><td>Both claim it!</td><td>Sydney 1985 vs Wellington 1989.</td></tr>
             </tbody>
           </table>
         </div>
         <div class="help-steps">
-          <div class="help-step"><span class="step-num">1</span> Create a Google Sheet with those column headers in Row 1</div>
-          <div class="help-step"><span class="step-num">2</span> Fill in your questions — <code>type</code> must be one of: <code>riddle</code> / <code>country</code> / <code>tf</code> / <code>spicy</code></div>
-          <div class="help-step"><span class="step-num">3</span> Click <strong>File → Share → Publish to web</strong></div>
-          <div class="help-step"><span class="step-num">4</span> Choose your sheet tab, then select <strong>Comma-separated values (.csv)</strong> from the dropdown</div>
-          <div class="help-step"><span class="step-num">5</span> Click <strong>Publish</strong> and copy the URL it gives you</div>
-          <div class="help-step"><span class="step-num">6</span> Paste the URL below and click <strong>Load</strong> — questions load once and are added to your list</div>
+          <div class="help-step"><span class="step-num">1</span> Create a Google Sheet with those headers in Row 1</div>
+          <div class="help-step"><span class="step-num">2</span> <code>type</code> values: <code>riddle</code> / <code>country</code> / <code>tf</code> / <code>spicy</code> / <code>bonus</code></div>
+          <div class="help-step"><span class="step-num">3</span> File → Share → Publish to web</div>
+          <div class="help-step"><span class="step-num">4</span> Choose sheet tab → Comma-separated values (.csv) → Publish</div>
+          <div class="help-step"><span class="step-num">5</span> Copy URL → paste below → click Load (loads once per URL)</div>
         </div>
-        <p style="font-size:12px;color:var(--muted);margin-top:8px">⚠️ Columns option_c, option_d, and fact are optional. At minimum you need: type, question, option_a, option_b, answer.</p>
+        <p style="font-size:12px;color:var(--muted);margin-top:8px">option_c, option_d and fact are optional. Minimum: type, question, option_a, option_b, answer.</p>
       </div>
     </div>
-
     <div class="sheets-input-row">
       <input type="text" id="sheets-url" placeholder="Paste your published CSV URL here…">
-      <button class="btn btn-next" onclick="loadFromSheets()" id="btn-load-sheets">Load</button>
+      <button class="btn btn-primary" id="btn-load-sheets" onclick="loadFromSheets()">Load</button>
     </div>
-    <div id="sheets-msg" style="font-size:13px;margin-top:8px;display:none"></div>
+    <div id="sheets-msg" style="font-size:13px;font-weight:700;margin-top:8px;display:none"></div>
   </div>
-
-  <!-- Add question form -->
   <div class="add-form">
     <h3>+ Add a Question</h3>
     <div class="form-grid">
-      <div class="form-group full">
-        <label>Question text</label>
-        <textarea id="new-q" rows="2" placeholder="e.g. I'm brown, salty, Aussies love me on toast. What am I?"></textarea>
+      <div class="form-group full"><label>Question text</label><textarea id="new-q" rows="2" placeholder="e.g. I'm brown, salty, Aussies love me on toast. What am I?"></textarea></div>
+      <div class="form-group"><label>Type</label>
+        <select id="new-type"><option value="riddle">🍳 Riddle</option><option value="country">🌍 Country</option><option value="tf">🤔 True/False</option><option value="spicy">🔥 Controversial</option><option value="bonus">⭐ Bonus</option></select>
       </div>
-      <div class="form-group">
-        <label>Type</label>
-        <select id="new-type">
-          <option value="riddle">🍳 What Am I? (Riddle)</option>
-          <option value="country">🌍 Which Country?</option>
-          <option value="tf">🤔 True or False</option>
-          <option value="spicy">🔥 Controversial</option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label>Answer (shown after reveal)</label>
-        <input type="text" id="new-ans" placeholder="e.g. Vegemite">
-      </div>
-      <div class="form-group">
-        <label>Option A</label>
-        <input type="text" id="new-o1" placeholder="e.g. Vegemite">
-      </div>
-      <div class="form-group">
-        <label>Option B</label>
-        <input type="text" id="new-o2" placeholder="e.g. Marmite">
-      </div>
-      <div class="form-group">
-        <label>Option C (optional)</label>
-        <input type="text" id="new-o3" placeholder="e.g. Promite">
-      </div>
-      <div class="form-group">
-        <label>Option D (optional)</label>
-        <input type="text" id="new-o4" placeholder="e.g. Peanut butter">
-      </div>
-      <div class="form-group full">
-        <label>Fun fact / discussion note (shown after answer)</label>
-        <input type="text" id="new-fact" placeholder="e.g. Vegemite was created in 1922 by Cyril Callister in Melbourne!">
-      </div>
+      <div class="form-group"><label>Answer</label><input type="text" id="new-ans" placeholder="e.g. Vegemite"></div>
+      <div class="form-group"><label>Option A</label><input type="text" id="new-o1"></div>
+      <div class="form-group"><label>Option B</label><input type="text" id="new-o2"></div>
+      <div class="form-group"><label>Option C (optional)</label><input type="text" id="new-o3"></div>
+      <div class="form-group"><label>Option D (optional)</label><input type="text" id="new-o4"></div>
+      <div class="form-group full"><label>Fun fact (optional)</label><input type="text" id="new-fact" placeholder="e.g. Vegemite was created in Melbourne in 1922!"></div>
     </div>
-    <button class="btn btn-next" onclick="addQuestion()">Add Question</button>
-    <span id="add-msg" style="font-size:13px;color:var(--green);margin-left:12px;display:none">✓ Added!</span>
+    <button class="btn btn-primary" onclick="addQuestion()">Add Question</button>
+    <span id="add-msg" style="font-size:13px;font-weight:700;color:var(--green);margin-left:10px;display:none">✓ Added!</span>
   </div>
-
-  <!-- Toolbar + list -->
   <div class="admin-toolbar">
     <button class="btn" onclick="selectAll()">Select All</button>
     <button class="btn" onclick="selectNone()">Deselect All</button>
     <button class="btn btn-danger" onclick="deleteSelected()">🗑 Delete Selected</button>
-    <div class="count-badge"><span id="sel-count">0</span> selected for quiz</div>
+    <div class="count-badge"><span id="sel-count">0</span> selected</div>
   </div>
-
   <div class="q-list" id="q-list"></div>
-
 </div>
 
 <script>
-// ════════════════════════════════════════════
-// DATA — default questions
-// ════════════════════════════════════════════
-const DEFAULT_QUESTIONS = [
-  { id:1, type:'riddle', q:"I'm bitter, bubbly, and usually come with a foamy head. In Belgium, Germany, Mexico or Japan, blokes have argued about my best version for centuries. What am I?", opts:["Cider","Beer","Kombucha","Ginger Ale"], ans:"Beer", fact:"Beer is one of the world's oldest alcoholic drinks, with brewing traditions found across many ancient civilizations." },
-  { id:3, type:'riddle', q:"I'm cold, creamy, Italian, and somehow more refined than ice cream after a big dinner. What am I?", opts:["Sorbet","Gelato","Custard","Affogato"], ans:"Gelato", fact:"Gelato is churned more slowly than many ice creams, giving it a denser texture and often a stronger flavour." },
-  { id:29, type:'riddle', q:"I'm smoky, amber, and often discussed by men as if choosing me requires a philosophy degree. I can be Scotch, bourbon, rye, or Irish. What am I?", opts:["Rum","Whisky / Whiskey","Brandy","Tequila"], ans:"Whisky / Whiskey", fact:"Scotch, bourbon, rye and Irish whiskey all have different rules, grains and ageing traditions, which is why fans debate them endlessly." },
-  { id:30, type:'riddle', q:"I'm coffee drowned with a scoop of gelato or ice cream — dessert, caffeine, and midlife survival in one glass. What am I?", opts:["Tiramisu","Affogato","Macchiato","Granita"], ans:"Affogato", fact:"Affogato means 'drowned' in Italian — traditionally vanilla gelato drowned with hot espresso." },
+// SOUNDS
+const AC=window.AudioContext||window.webkitAudioContext;let ac=null;
+function getAC(){if(!ac)ac=new AC();return ac;}
+function tone(f,t,d,v,dl){try{const c=getAC(),o=c.createOscillator(),g=c.createGain();o.connect(g);g.connect(c.destination);o.type=t;o.frequency.value=f;const s=c.currentTime+(dl||0);g.gain.setValueAtTime(v||.14,s);g.gain.exponentialRampToValueAtTime(.001,s+d);o.start(s);o.stop(s+d);}catch(e){}}
+function soundCorrect(){tone(523,'sine',.12,.18);tone(659,'sine',.12,.18,.12);tone(784,'sine',.2,.18,.24);}
+function soundReveal(){tone(440,'triangle',.08,.12);tone(554,'triangle',.08,.12,.09);tone(659,'triangle',.15,.12,.18);}
+function soundTimeUp(){tone(300,'sawtooth',.06,.14);tone(260,'sawtooth',.06,.14,.1);tone(220,'sawtooth',.15,.14,.2);}
+function soundPoint(){tone(880,'sine',.1,.15);tone(1108,'sine',.1,.15,.1);}
+function soundWin(){[523,659,784,1047].forEach((f,i)=>tone(f,'sine',.25,.18,i*.12));}
 
-  { id:9, type:'country', q:"Fish and chips — everyone claims it. Who actually popularised it as a dish?", opts:["Australia","France","UK","Portugal"], ans:"UK (popularised it)", fact:"Portuguese Jewish immigrants brought fried fish to England, and Belgian/Irish communities added the chips. The UK ran with it." },
-  { id:10, type:'country', q:"Butter chicken (murgh makhani) — where was it actually invented?", opts:["Punjab villages","Delhi restaurant","Mumbai street","Lahore market"], ans:"Delhi restaurant, 1950s", fact:"Invented at Moti Mahal restaurant in Delhi by Kundan Lal Gujral. He added butter and tomato to leftover tandoori chicken." },
-  { id:14, type:'country', q:"Dim sum — the tradition of small steamed dishes in bamboo baskets — which country?", opts:["Japan","Korea","Vietnam","China"], ans:"China", fact:"Dim sum originated in Cantonese teahouses (yum cha) along the ancient Silk Road as a resting spot for travellers." },
-  { id:31, type:'country', q:"Pilsner beer was first brewed in which present-day country?", opts:["Germany","Czech Republic","Belgium","Netherlands"], ans:"Czech Republic", fact:"Pilsner was born in Plzeň, Bohemia, in 1842 — now in the Czech Republic — and became one of the world's most copied beer styles." },
-  { id:32, type:'country', q:"Gelato is most strongly associated with which country?", opts:["Spain","France","Italy","Greece"], ans:"Italy", fact:"Italy is famous for gelato, especially cities like Florence, Rome and Bologna where artisan gelaterias are part of food culture." },
+// CONFETTI
+function launchConfetti(){
+  const cv=document.getElementById('confetti-canvas'),ctx=cv.getContext('2d');
+  cv.width=window.innerWidth;cv.height=window.innerHeight;
+  const cols=['#E8780C','#1D8A4E','#DC2626','#2563EB','#7C3AED','#F59E0B','#fff'];
+  const ps=Array.from({length:200},()=>({x:Math.random()*cv.width,y:Math.random()*cv.height-cv.height,w:Math.random()*10+5,h:Math.random()*6+3,color:cols[Math.floor(Math.random()*cols.length)],angle:Math.random()*Math.PI*2,spin:(Math.random()-.5)*.2,vx:(Math.random()-.5)*3,vy:Math.random()*3+2}));
+  let f=0;
+  (function draw(){ctx.clearRect(0,0,cv.width,cv.height);ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.angle+=p.spin;ctx.save();ctx.translate(p.x+p.w/2,p.y+p.h/2);ctx.rotate(p.angle);ctx.fillStyle=p.color;ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);ctx.restore();});if(++f<240)requestAnimationFrame(draw);else ctx.clearRect(0,0,cv.width,cv.height);})();
+}
 
-  { id:21, type:'tf', q:"True or False: Honey is the only food that never expires.", opts:["True","False"], ans:"TRUE", fact:"3,000-year-old honey found in Egyptian tombs was still perfectly edible. Its low moisture and acidic pH prevent bacteria." },
-  { id:23, type:'tf', q:"True or False: The samosa originally came from India.", opts:["True","False"], ans:"FALSE — Central Asia / Middle East", fact:"Samosas came from Central Asia and the Middle East (called 'sambosa'). Traders brought them to India in the 13th–14th century." },
-  { id:33, type:'tf', q:"True or False: Guinness was first brewed in Ireland.", opts:["True","False"], ans:"TRUE", fact:"Guinness traces its roots to St. James's Gate Brewery in Dublin, where Arthur Guinness began brewing in 1759." },
-  { id:34, type:'tf', q:"True or False: Gelato usually contains less air than standard ice cream, making it feel denser.", opts:["True","False"], ans:"TRUE", fact:"Gelato is typically churned slower than ice cream, so it contains less air and has a denser texture." },
+// DATA
+const DEFAULT_QUESTIONS=[
+  {id:1,type:'riddle',q:"I'm brown, salty, and Aussies spread me very thin — tourists always go way too thick. What am I?",opts:["Vegemite","Marmite","Promite","Bovril"],ans:"Vegemite",fact:"Vegemite was invented in Melbourne in 1922. Now owned by Aussie company Bega Cheese."},
+  {id:2,type:'riddle',q:"I'm a crispy pastry pocket filled with spiced potato and peas. Every Indian street corner sells me. What am I?",opts:["Spring Roll","Samosa","Dumpling","Empanada"],ans:"Samosa",fact:"Samosas actually originated in Central Asia and the Middle East — brought to India by traders!"},
+  {id:3,type:'riddle',q:"I'm white, fluffy, named after a Russian ballerina, topped with cream and fruit. Both Aussies AND Kiwis say they invented me. What am I?",opts:["Meringue","Eton Mess","Pavlova","Angel Cake"],ans:"Pavlova",fact:"NZ has the earliest known recipe (1929) but Australia contests this hotly!"},
 
-  { id:27, type:'spicy', q:"🔥 Who makes the better meat pie — Australia or New Zealand? Kiwis will have OPINIONS about this.", opts:["Australia — the original","NZ — more fillings, better pastry","They're exactly the same pie","Neither — it's just soggy pastry"], ans:"No right answer — let them fight!", fact:"NZ pie culture is intense — the annual NZ Bakels Supreme Pie Awards is a serious national event. Aussies just want it at the footy." },
-  { id:28, type:'spicy', q:"🔥 The flat white coffee — invented in Australia or New Zealand? This one genuinely has no settled answer.", opts:["Australia (Sydney, 1985)","New Zealand (Wellington, 1989)","Italy — all coffee is Italian","Who cares, just give me chai"], ans:"Both claim it — coffee war!", fact:"Australia (DBar cafe, Sydney 1985) and NZ (Mojo cafe, Wellington 1989) both have documented claims. This debate is unresolvable and that's the point." },
-  { id:35, type:'spicy', q:"🔥 Beer fight: if you could only drink one style at a BBQ forever, what wins?", opts:["Crisp lager — no drama","IPA — hops or nothing","Stout — proper grown-up pint","Pale ale — safe middle ground"], ans:"No right answer — presenter's call!", fact:"Beer style loyalties are serious business: lager, IPA, stout and pale ale fans often want completely different flavours." },
-  { id:36, type:'spicy', q:"🔥 Dessert debate for grown men: what is the best after-dinner move?", opts:["Gelato","Whisky","Espresso","All three — affogato plus a dram"], ans:"No right answer — room vote!", fact:"Gelato, espresso and whisky all work as classic post-dinner choices — combining them may be bold, brilliant, or a cry for help." },
+  {id:6,type:'riddle',q:"I'm a Kiwi fizzy drink, bright yellow-green, tagline 'World Famous in New Zealand'. What am I?",opts:["Fanta","L&P","Solo","Lift"],ans:"L&P (Lemon & Paeroa)",fact:"L&P has been made since 1907, originally from a natural mineral spring in Paeroa, NZ."},
+
+  {id:9,type:'country',q:"Fish and chips — everyone claims it. Who actually popularised it as a dish?",opts:["Australia","France","UK","Portugal"],ans:"UK (popularised it)",fact:"Portuguese Jewish immigrants brought fried fish to England, then Belgian communities added the chips."},
+  {id:10,type:'country',q:"Butter chicken (murgh makhani) — where was it actually invented?",opts:["Punjab villages","Delhi restaurant","Mumbai street","Lahore market"],ans:"Delhi restaurant, 1950s",fact:"Invented at Moti Mahal restaurant in Delhi. Butter and tomato added to leftover tandoori chicken."},
+  {id:11,type:'country',q:"Lamingtons — sponge cake in chocolate and coconut — which country?",opts:["UK","New Zealand","Australia","Canada"],ans:"Australia",fact:"Named after Lord Lamington, Governor of Queensland in the 1890s. NZ also makes them and will fight about it."},
+
+  {id:14,type:'country',q:"Dim sum — small steamed dishes in bamboo baskets — where does this tradition come from?",opts:["Japan","Korea","Vietnam","China"],ans:"China",fact:"Dim sum originated in Cantonese teahouses along the ancient Silk Road."},
+  {id:15,type:'tf',q:"True or False: Vegemite is currently owned by an Australian company.",opts:["True","False"],ans:"TRUE",fact:"TRUE — Bega Cheese bought Vegemite from Kraft in 2017. Finally back in Aussie hands!"},
+
+  {id:18,type:'tf',q:"True or False: NZ Marmite and UK Marmite taste exactly the same.",opts:["True","False"],ans:"FALSE — NZ Marmite is sweeter",fact:"Kiwi Marmite (Sanitarium) is distinctly sweeter and milder than the British version."},
+
+  {id:21,type:'tf',q:"True or False: Honey is the only food that never expires.",opts:["True","False"],ans:"TRUE",fact:"3,000-year-old honey found in Egyptian tombs was still perfectly edible!"},
+
+  {id:23,type:'tf',q:"True or False: The samosa originally came from India.",opts:["True","False"],ans:"FALSE — Central Asia / Middle East",fact:"Samosas came from Central Asia (called 'sambosa') and arrived in India in the 13th-14th century."},
+
+  {id:25,type:'spicy',q:"VEGEMITE vs MARMITE — which is better on toast? Indians may abstain on grounds of sanity.",opts:["Vegemite (the original)","Marmite (the real thing)","Neither — this is not food","Both are great, stop fighting"],ans:"No right answer — presenter's call!",fact:"Vegemite: yeasty, strong, Aussie. NZ Marmite: sweeter. UK Marmite: intense. All made from yeast extract."},
+  {id:26,type:'spicy',q:"TRUE OR FALSE: Biryani is just fancy fried rice. Indians — you may now defend yourselves.",opts:["True — it's rice with stuff","FALSE and how dare you","Kind of — it's rice-based","Depends on the region"],ans:"FALSE — deeply offensive question!",fact:"Biryani uses dum cooking, whole spices, saffron, marinated meat. The comparison is fighting words."},
+  {id:27,type:'spicy',q:"Who makes the better meat pie — Australia or New Zealand?",opts:["Australia — the original","NZ — more fillings, better pastry","They're exactly the same","Neither — soggy pastry"],ans:"No right answer — let them fight!",fact:"The annual NZ Bakels Supreme Pie Awards is a serious national event. Aussies just want it at the footy."},
+  {id:28,type:'spicy',q:"The flat white — invented in Australia or New Zealand? Genuinely no settled answer.",opts:["Australia (Sydney, 1985)","New Zealand (Wellington, 1989)","Italy — all coffee is Italian","Who cares, give me chai"],ans:"Both claim it — coffee war!",fact:"Australia (DBar cafe, 1985) and NZ (Mojo cafe, 1989) both have documented claims. Unresolvable."},
+  {id:29,type:'bonus',q:"BONUS: Name the only country where Vegemite is sold as a genuine everyday staple — not a novelty import.",opts:["UK","USA","Australia","New Zealand"],ans:"Australia",fact:"Vegemite is a genuine everyday product only in Australia. Everywhere else it's a curiosity or expat staple."},
+  {id:30,type:'bonus',q:"BONUS: What cooking technique makes biryani different from a regular rice dish?",opts:["Boiling","Dum (slow steam)","Stir frying","Pressure cooking"],ans:"Dum (slow steam)",fact:"Dum means slow-cooking sealed under a dough or foil lid. Steam pressure cooks everything together."},
+  {id:31,type:'bonus',q:"BONUS: Which Australian city is considered the coffee capital — where the flat white debate started?",opts:["Brisbane","Sydney","Melbourne","Perth"],ans:"Melbourne",fact:"Melbourne's cafe culture is legendary. The flat white dispute is mostly Melbourne vs Wellington."},
+  {id:32,type:'bonus',q:"BONUS: What gives L&P (Lemon and Paeroa) its distinctive original flavour?",opts:["Synthetic lemon flavour","Mineral spring water from Paeroa","Yuzu citrus","Volcanic water"],ans:"Mineral spring water from Paeroa",fact:"L&P was originally made by combining lemon juice with natural mineral water from a spring in Paeroa, NZ."},
 ];
 
-// ════════════════════════════════════════════
-// STATE
-// ════════════════════════════════════════════
-let questions    = JSON.parse(JSON.stringify(DEFAULT_QUESTIONS)); // working copy
-let selectedIds  = new Set(questions.map(q => q.id));            // all selected by default
-let quizQueue    = [];
-let currentIdx   = -1;
-let scores       = { a: 0, b: 0 };
-let timerInterval = null;
-let timeLeft      = 15;
-let revealed      = false;
-let quizStarted   = false;
+let questions=JSON.parse(JSON.stringify(DEFAULT_QUESTIONS));
+let selectedIds=new Set(questions.map(q=>q.id));
+let quizQueue=[],currentIdx=-1,scores={a:0,b:0};
+let timerInterval=null,timeLeft=15,revealed=false,isBonusRound=false,sheetsLoaded=false;
 
-// ════════════════════════════════════════════
-// PAGE NAVIGATION
-// ════════════════════════════════════════════
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('page-' + name).classList.add('active');
-  document.getElementById('nav-' + name).classList.add('active');
-  if (name === 'admin') renderAdminList();
-}
+function showPage(name){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));document.getElementById('page-'+name).classList.add('active');document.getElementById('nav-'+name).classList.add('active');if(name==='admin')renderAdminList();}
 
-// ════════════════════════════════════════════
-// TEAM NAMES
-// ════════════════════════════════════════════
-function updateTeamNames() {
-  const a = document.getElementById('team-a-name').value || 'Team A';
-  const b = document.getElementById('team-b-name').value || 'Team B';
-  document.getElementById('display-a').textContent = a;
-  document.getElementById('display-b').textContent = b;
-  document.getElementById('award-a-label').textContent = a;
-  document.getElementById('award-b-label').textContent = b;
-  document.getElementById('final-a-label').textContent = a;
-  document.getElementById('final-b-label').textContent = b;
-}
+function updateTeamNames(){const a=document.getElementById('team-a-name').value||'Team A',b=document.getElementById('team-b-name').value||'Team B';document.getElementById('display-a').textContent=a;document.getElementById('display-b').textContent=b;document.getElementById('award-a-label').textContent=a;document.getElementById('award-b-label').textContent=b;document.getElementById('final-a-label').textContent=a;document.getElementById('final-b-label').textContent=b;}
 
-// ════════════════════════════════════════════
-// QUIZ LOGIC
-// ════════════════════════════════════════════
-function startQuiz() {
-  quizQueue = questions.filter(q => selectedIds.has(q.id));
-  if (quizQueue.length === 0) {
-    alert('No questions selected! Go to Configure to select some.');
-    return;
-  }
-  // shuffle
-  quizQueue.sort(() => Math.random() - .5);
-  scores = { a: 0, b: 0 };
-  currentIdx = -1;
-  quizStarted = true;
-  document.getElementById('pts-a').textContent = 0;
-  document.getElementById('pts-b').textContent = 0;
-  document.getElementById('game-over').style.display = 'none';
-  document.getElementById('q-card').style.display = 'block';
-  document.getElementById('btn-start').style.display = 'none';
-  nextQuestion();
-}
+function buildQueue(){const pool=questions.filter(q=>selectedIds.has(q.id)&&q.type!=='bonus');const bonus=questions.filter(q=>selectedIds.has(q.id)&&q.type==='bonus');pool.sort(()=>Math.random()-.5);bonus.sort(()=>Math.random()-.5);const n=parseInt(document.getElementById('q-count-select').value);return[...(n===0?pool:pool.slice(0,n)),...bonus];}
 
-function nextQuestion() {
+function startQuiz(){quizQueue=buildQueue();if(!quizQueue.length){alert('No questions selected!');return;}scores={a:0,b:0};currentIdx=-1;isBonusRound=false;document.getElementById('pts-a').textContent='0';document.getElementById('pts-b').textContent='0';document.getElementById('game-over').style.display='none';document.getElementById('q-card').style.display='block';document.getElementById('bonus-banner').style.display='none';document.getElementById('btn-start').style.display='none';nextQuestion();}
+
+function nextQuestion(){
   currentIdx++;
-  if (currentIdx >= quizQueue.length) { showGameOver(); return; }
-
-  revealed = false;
-  const q = quizQueue[currentIdx];
+  if(currentIdx>=quizQueue.length){showGameOver();return;}
+  revealed=false;const q=quizQueue[currentIdx];
+  const wasBonus=isBonusRound;isBonusRound=q.type==='bonus';
+  if(isBonusRound&&!wasBonus)document.getElementById('bonus-banner').style.display='block';
+  else if(!isBonusRound)document.getElementById('bonus-banner').style.display='none';
   updateProgress();
-
-  // badge
-  const badges = { riddle:'badge-riddle', country:'badge-country', tf:'badge-tf', spicy:'badge-spicy' };
-  const labels = { riddle:'🍳 What Am I?', country:'🌍 Which Country?', tf:'🤔 True or False', spicy:'🔥 Controversial' };
-  const badge = document.getElementById('q-badge');
-  badge.className = 'q-type-badge ' + (badges[q.type] || 'badge-riddle');
-  badge.textContent = labels[q.type] || '❓';
-
-  document.getElementById('q-num').textContent = 'Q ' + (currentIdx + 1);
-  document.getElementById('q-text').textContent = q.q;
-
-  // options
-  const grid = document.getElementById('options-grid');
-  const letters = ['A','B','C','D'];
-  grid.innerHTML = (q.opts || []).map((o, i) =>
-    `<button class="opt-btn" data-idx="${i}" onclick="selectOpt(this,${i})">
-      <span class="opt-letter">${letters[i]}</span>${o}
-    </button>`).join('');
-
-  // hide/show elements
-  document.getElementById('fact-box').style.display = 'none';
-  document.getElementById('fact-box').innerHTML = '';
-  document.getElementById('time-up-box').style.display = 'none';
-  document.getElementById('btn-reveal').style.display = 'inline-block';
-  document.getElementById('btn-next').style.display = 'none';
-  document.getElementById('btn-award-a').style.display = 'none';
-  document.getElementById('btn-award-a').disabled = false;
-  document.getElementById('btn-award-b').style.display = 'none';
-  document.getElementById('btn-award-b').disabled = false;
-  document.getElementById('btn-skip').style.display = 'none';
-  document.getElementById('point-flash').style.display = 'none';
-
-  // timer
+  const badges={riddle:'badge-riddle',country:'badge-country',tf:'badge-tf',spicy:'badge-spicy',bonus:'badge-bonus'};
+  const labels={riddle:'🍳 What Am I?',country:'🌍 Which Country?',tf:'🤔 True or False',spicy:'🔥 Controversial',bonus:'⭐ Bonus'};
+  const badge=document.getElementById('q-badge');badge.className='q-type-badge '+(badges[q.type]||'badge-riddle');badge.textContent=labels[q.type]||'❓';
+  document.getElementById('q-num').textContent='Q '+(currentIdx+1)+' / '+quizQueue.length;
+  document.getElementById('q-text').textContent=q.q;
+  const letters=['A','B','C','D'];
+  document.getElementById('options-grid').innerHTML=(q.opts||[]).map((o,i)=>`<button class="opt-btn" onclick="selectOpt(this,${i})"><span class="opt-letter">${letters[i]}</span>${o}</button>`).join('');
+  document.getElementById('fact-box').style.display='none';document.getElementById('fact-box').innerHTML='';
+  document.getElementById('time-up-box').style.display='none';
+  document.getElementById('btn-reveal').style.display='inline-block';document.getElementById('btn-next').style.display='none';
+  document.getElementById('btn-award-a').style.display='none';document.getElementById('btn-award-a').disabled=false;
+  document.getElementById('btn-award-b').style.display='none';document.getElementById('btn-award-b').disabled=false;
+  document.getElementById('btn-skip').style.display='none';document.getElementById('point-flash').style.display='none';
+  const card=document.getElementById('q-card');card.style.animation='none';card.offsetHeight;card.style.animation='fadeUp .25s ease';
   startTimer();
 }
 
-function selectOpt(btn, chosenIdx) {
-  const q = quizQueue[currentIdx];
-  // find correct option index — match answer text against opts array
-  const correctIdx = q.opts.findIndex(o => o === q.ans);
-  // disable all
-  document.querySelectorAll('.opt-btn').forEach((b, i) => {
-    b.disabled = true;
-    if (i === correctIdx) b.classList.add('correct');
-  });
-  if (chosenIdx !== correctIdx) btn.classList.add('wrong');
-  stopTimer();
-  showRevealUI();
-}
+function selectOpt(btn,ci_chosen){const q=quizQueue[currentIdx];const ci=q.opts.findIndex(o=>o===q.ans);document.querySelectorAll('.opt-btn').forEach((b,i)=>{b.disabled=true;if(i===ci)b.classList.add('correct');});if(ci_chosen!==ci)btn.classList.add('wrong');else soundCorrect();stopTimer();showRevealUI();}
 
-function revealAnswer() {
-  const q = quizQueue[currentIdx];
-  stopTimer();
-  const correctIdx = q.opts.findIndex(o => o === q.ans);
-  document.querySelectorAll('.opt-btn').forEach((b, i) => {
-    b.disabled = true;
-    if (i === correctIdx) b.classList.add('correct');
-  });
-  const fb = document.getElementById('fact-box');
-  fb.innerHTML = '<strong>✅ Answer: ' + q.ans + '</strong>' + (q.fact ? '<br>' + q.fact : '');
-  fb.style.display = 'block';
-  showRevealUI();
-}
+function revealAnswer(){const q=quizQueue[currentIdx];stopTimer();const ci=q.opts.findIndex(o=>o===q.ans);document.querySelectorAll('.opt-btn').forEach((b,i)=>{b.disabled=true;if(i===ci)b.classList.add('correct');});document.getElementById('time-up-box').style.display='none';const fb=document.getElementById('fact-box');fb.innerHTML='<strong>Answer: '+q.ans+'</strong>'+(q.fact?' — '+q.fact:'');fb.style.display='block';soundReveal();showRevealUI();}
 
-function showRevealUI() {
-  revealed = true;
-  document.getElementById('btn-reveal').style.display = 'none';
-  document.getElementById('btn-award-a').style.display = 'inline-block';
-  document.getElementById('btn-award-b').style.display = 'inline-block';
-  document.getElementById('btn-skip').style.display = 'inline-block';
-  document.getElementById('btn-next').style.display = 'none'; // hidden until a point is awarded
-  // show fact if not shown yet
-  const q = quizQueue[currentIdx];
-  const fb = document.getElementById('fact-box');
-  if (fb.style.display === 'none') {
-    fb.innerHTML = '<strong>✅ Answer: ' + q.ans + '</strong>' + (q.fact ? '<br>' + q.fact : '');
-    fb.style.display = 'block';
-  }
-}
+function showRevealUI(){revealed=true;document.getElementById('btn-reveal').style.display='none';document.getElementById('btn-award-a').style.display='inline-block';document.getElementById('btn-award-b').style.display='inline-block';document.getElementById('btn-skip').style.display='inline-block';document.getElementById('btn-next').style.display='none';const q=quizQueue[currentIdx];const fb=document.getElementById('fact-box');if(fb.style.display==='none'){fb.innerHTML='<strong>Answer: '+q.ans+'</strong>'+(q.fact?' — '+q.fact:'');fb.style.display='block';}}
 
-function awardPoint(team) {
-  scores[team]++;
-  document.getElementById('pts-' + team).textContent = scores[team];
-  const name = team === 'a'
-    ? (document.getElementById('team-a-name').value || 'Team A')
-    : (document.getElementById('team-b-name').value || 'Team B');
-  const flash = document.getElementById('point-flash');
-  flash.textContent = '+1 point → ' + name + '!';
-  flash.className = 'point-flash ' + team;
-  flash.style.display = 'inline-block';
-  // disable both award buttons so you can't double-award
-  document.getElementById('btn-award-a').disabled = true;
-  document.getElementById('btn-award-b').disabled = true;
-  // now show Next
-  document.getElementById('btn-next').style.display = 'inline-block';
-  document.getElementById('btn-skip').style.display = 'none';
-  setTimeout(() => { flash.style.display = 'none'; }, 2000);
-}
+function awardPoint(team){const pts=isBonusRound?2:1;scores[team]+=pts;document.getElementById('pts-'+team).textContent=scores[team];const name=team==='a'?(document.getElementById('team-a-name').value||'Team A'):(document.getElementById('team-b-name').value||'Team B');const fl=document.getElementById('point-flash');fl.textContent='+'+pts+' → '+name+(isBonusRound?' 🌟':'!');fl.className='point-flash '+team;fl.style.display='inline-block';document.getElementById('btn-award-a').disabled=true;document.getElementById('btn-award-b').disabled=true;document.getElementById('btn-skip').style.display='none';document.getElementById('btn-next').style.display='inline-block';soundPoint();setTimeout(()=>{fl.style.display='none';},2200);}
 
-function skipQuestion() {
-  stopTimer();
+function skipQuestion(){stopTimer();document.getElementById('btn-award-a').disabled=true;document.getElementById('btn-award-b').disabled=true;document.getElementById('btn-skip').style.display='none';document.getElementById('time-up-box').style.display='none';document.getElementById('btn-next').style.display='inline-block';}
 
-  // hide UI
-  document.getElementById('btn-award-a').disabled = true;
-  document.getElementById('btn-award-b').disabled = true;
-  document.getElementById('btn-skip').style.display = 'none';
-  document.getElementById('time-up-box').style.display = 'none';
-  document.getElementById('btn-next').style.display = 'none';
+function updateProgress(){document.getElementById('q-progress').textContent='Q '+(currentIdx+1)+' / '+quizQueue.length;}
 
-  // immediately go to next question
-  nextQuestion();
-}
+function showGameOver(){stopTimer();document.getElementById('q-card').style.display='none';document.getElementById('bonus-banner').style.display='none';const go=document.getElementById('game-over');go.style.display='block';document.getElementById('final-a').textContent=scores.a;document.getElementById('final-b').textContent=scores.b;const na=document.getElementById('team-a-name').value||'Team A',nb=document.getElementById('team-b-name').value||'Team B';if(scores.a>scores.b){document.getElementById('winner-emoji').textContent='🏆';document.getElementById('winner-text').textContent=na+' wins!';}else if(scores.b>scores.a){document.getElementById('winner-emoji').textContent='🏆';document.getElementById('winner-text').textContent=nb+' wins!';}else{document.getElementById('winner-emoji').textContent='🤝';document.getElementById('winner-text').textContent="It's a draw!";}soundWin();launchConfetti();}
 
-function updateProgress() {
-  document.getElementById('q-progress').textContent = 'Q ' + (currentIdx + 1) + ' / ' + quizQueue.length;
-}
+function restartGame(){document.getElementById('game-over').style.display='none';document.getElementById('q-card').style.display='block';document.getElementById('btn-start').style.display='inline-block';['btn-reveal','btn-next','btn-award-a','btn-award-b','btn-skip'].forEach(id=>{const el=document.getElementById(id);el.style.display='none';if(el.disabled!==undefined)el.disabled=false;});document.getElementById('options-grid').innerHTML='';document.getElementById('q-text').textContent='Press Start Quiz to begin!';document.getElementById('q-badge').textContent='❓';document.getElementById('fact-box').style.display='none';document.getElementById('timer-row').style.display='none';document.getElementById('q-num').textContent='';document.getElementById('q-progress').textContent='–';scores={a:0,b:0};document.getElementById('pts-a').textContent='0';document.getElementById('pts-b').textContent='0';}
 
-function showGameOver() {
-  stopTimer();
-  document.getElementById('q-card').style.display = 'none';
-  const go = document.getElementById('game-over');
-  go.style.display = 'block';
-  document.getElementById('final-a').textContent = scores.a;
-  document.getElementById('final-b').textContent = scores.b;
-  const nameA = document.getElementById('team-a-name').value || 'Team A';
-  const nameB = document.getElementById('team-b-name').value || 'Team B';
-  if (scores.a > scores.b) {
-    document.getElementById('winner-emoji').textContent = '🏆';
-    document.getElementById('winner-text').textContent = nameA + ' wins!';
-  } else if (scores.b > scores.a) {
-    document.getElementById('winner-emoji').textContent = '🏆';
-    document.getElementById('winner-text').textContent = nameB + ' wins!';
-  } else {
-    document.getElementById('winner-emoji').textContent = '🤝';
-    document.getElementById('winner-text').textContent = "It's a draw!";
-  }
-}
+function getTimerDuration(){return parseInt(document.getElementById('timer-duration').value,10);}
+function startTimer(){document.getElementById('time-up-box').style.display='none';const dur=getTimerDuration();if(dur===0){document.getElementById('timer-row').style.display='none';return;}timeLeft=dur;document.getElementById('timer-row').style.display='flex';updateTimerDisplay();clearInterval(timerInterval);timerInterval=setInterval(()=>{timeLeft--;updateTimerDisplay();if(timeLeft<=0){stopTimer();onTimerExpired();}},1000);}
+function onTimerExpired(){soundTimeUp();document.querySelectorAll('.opt-btn').forEach(b=>b.disabled=true);document.getElementById('time-up-box').style.display='flex';document.getElementById('btn-reveal').style.display='none';}
+function stopTimer(){clearInterval(timerInterval);}
+function updateTimerDisplay(){document.getElementById('timer-val').textContent=timeLeft;const dur=getTimerDuration()||15,pct=(timeLeft/dur)*100;const bar=document.getElementById('timer-bar'),ring=document.getElementById('timer-ring');bar.style.width=pct+'%';const u=timeLeft<=5;bar.className='timer-bar'+(u?' urgent':'');ring.className='timer-ring'+(u?' urgent':'');}
 
-function restartGame() {
-  document.getElementById('game-over').style.display = 'none';
-  document.getElementById('q-card').style.display = 'block';
-  document.getElementById('btn-start').style.display = 'inline-block';
-  document.getElementById('btn-reveal').style.display = 'none';
-  document.getElementById('btn-next').style.display = 'none';
-  document.getElementById('btn-award-a').style.display = 'none';
-  document.getElementById('btn-award-b').style.display = 'none';
-  document.getElementById('options-grid').innerHTML = '';
-  document.getElementById('q-text').textContent = 'Press "Start Quiz" to begin!';
-  document.getElementById('q-badge').textContent = '❓ Question';
-  document.getElementById('fact-box').style.display = 'none';
-  document.getElementById('timer-row').style.display = 'none';
-  scores = { a: 0, b: 0 };
-  document.getElementById('pts-a').textContent = 0;
-  document.getElementById('pts-b').textContent = 0;
-}
+function renderAdminList(){const list=document.getElementById('q-list');const labels={riddle:'🍳 Riddle',country:'🌍 Country',tf:'🤔 T/F',spicy:'🔥 Spicy',bonus:'⭐ Bonus'};if(!questions.length){list.innerHTML='<div class="empty-state"><span class="big">🍽️</span>No questions yet.</div>';document.getElementById('sel-count').textContent=0;return;}list.innerHTML=questions.map(q=>`<div class="q-item ${selectedIds.has(q.id)?'selected':''}" onclick="toggleSelect(${q.id})"><div class="q-checkbox"></div><div class="q-body"><div class="q-preview">${labels[q.type]||'❓'} &nbsp;${q.q}</div><div class="q-answer">Answer: <span>${q.ans}</span></div></div><div class="q-actions" onclick="event.stopPropagation()"><button class="icon-btn" onclick="deleteOne(${q.id})">🗑</button></div></div>`).join('');document.getElementById('sel-count').textContent=selectedIds.size;}
+function toggleSelect(id){selectedIds.has(id)?selectedIds.delete(id):selectedIds.add(id);renderAdminList();}
+function selectAll(){questions.forEach(q=>selectedIds.add(q.id));renderAdminList();}
+function selectNone(){selectedIds.clear();renderAdminList();}
+function deleteOne(id){if(!confirm('Delete this question?'))return;questions=questions.filter(q=>q.id!==id);selectedIds.delete(id);renderAdminList();}
+function deleteSelected(){if(!selectedIds.size)return;if(!confirm('Delete '+selectedIds.size+' question(s)?'))return;questions=questions.filter(q=>!selectedIds.has(q.id));selectedIds.clear();renderAdminList();}
+function addQuestion(){const qt=document.getElementById('new-q').value.trim(),ans=document.getElementById('new-ans').value.trim(),type=document.getElementById('new-type').value,o1=document.getElementById('new-o1').value.trim(),o2=document.getElementById('new-o2').value.trim(),o3=document.getElementById('new-o3').value.trim(),o4=document.getElementById('new-o4').value.trim(),fact=document.getElementById('new-fact').value.trim();if(!qt||!ans||!o1||!o2){alert('Question, answer, and at least 2 options required.');return;}const id=Date.now();questions.push({id,type,q:qt,opts:[o1,o2,o3,o4].filter(Boolean),ans,fact});selectedIds.add(id);['new-q','new-ans','new-o1','new-o2','new-o3','new-o4','new-fact'].forEach(i=>document.getElementById(i).value='');const msg=document.getElementById('add-msg');msg.style.display='inline';setTimeout(()=>msg.style.display='none',2000);renderAdminList();}
 
-// ════════════════════════════════════════════
-// TIMER
-// ════════════════════════════════════════════
-// TIMER
-// ════════════════════════════════════════════
-function getTimerDuration() {
-  return parseInt(document.getElementById('timer-duration').value, 10);
-}
-
-function startTimer() {
-  const duration = getTimerDuration();
-
-  // Hide time-up box from previous question
-  document.getElementById('time-up-box').style.display = 'none';
-
-  if (duration === 0) {
-    // No timer mode — hide the timer row entirely
-    document.getElementById('timer-row').style.display = 'none';
-    return;
-  }
-
-  timeLeft = duration;
-  document.getElementById('timer-row').style.display = 'flex';
-  updateTimerDisplay();
-  clearInterval(timerInterval);
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    updateTimerDisplay();
-    if (timeLeft <= 0) {
-      stopTimer();
-      onTimerExpired();
-    }
-  }, 1000);
-}
-
-function onTimerExpired() {
-  // Disable options so nobody can click after time runs out
-  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
-  // Show the "reveal or skip?" prompt — presenter decides
-  document.getElementById('time-up-box').style.display = 'flex';
-  // Hide the reveal button (it's now in the time-up box)
-  document.getElementById('btn-reveal').style.display = 'none';
-}
-
-function stopTimer() { clearInterval(timerInterval); }
-
-function updateTimerDisplay() {
-  document.getElementById('timer-val').textContent = timeLeft;
-  const duration = getTimerDuration() || 15;
-  const pct = (timeLeft / duration) * 100;
-  const bar  = document.getElementById('timer-bar');
-  const ring = document.getElementById('timer-ring');
-  bar.style.width = pct + '%';
-  const urgent = timeLeft <= 5;
-  bar.className  = 'timer-bar'  + (urgent ? ' urgent' : '');
-  ring.className = 'timer-ring' + (urgent ? ' urgent' : '');
-}
-
-// ════════════════════════════════════════════
-// ADMIN — render list
-// ════════════════════════════════════════════
-function renderAdminList() {
-  const list = document.getElementById('q-list');
-  const typeLabels = { riddle:'🍳 Riddle', country:'🌍 Country', tf:'🤔 T/F', spicy:'🔥 Spicy' };
-
-  if (questions.length === 0) {
-    list.innerHTML = '<div class="empty-state"><span class="big">🍽️</span>No questions yet. Add some above!</div>';
-    document.getElementById('sel-count').textContent = 0;
-    return;
-  }
-
-  list.innerHTML = questions.map(q => `
-    <div class="q-item ${selectedIds.has(q.id) ? 'selected' : ''}" id="qi-${q.id}" onclick="toggleSelect(${q.id})">
-      <div class="q-checkbox"></div>
-      <div class="q-body">
-        <div class="q-preview">${typeLabels[q.type] || '❓'} &nbsp;${q.q}</div>
-        <div class="q-answer">Answer: <span>${q.ans}</span></div>
-      </div>
-      <div class="q-actions" onclick="event.stopPropagation()">
-        <button class="icon-btn" title="Delete" onclick="deleteOne(${q.id})">🗑</button>
-      </div>
-    </div>`).join('');
-
-  document.getElementById('sel-count').textContent = selectedIds.size;
-}
-
-function toggleSelect(id) {
-  if (selectedIds.has(id)) selectedIds.delete(id);
-  else selectedIds.add(id);
-  renderAdminList();
-}
-
-function selectAll()  { questions.forEach(q => selectedIds.add(q.id));    renderAdminList(); }
-function selectNone() { selectedIds.clear();                               renderAdminList(); }
-
-function deleteOne(id) {
-  if (!confirm('Delete this question?')) return;
-  questions = questions.filter(q => q.id !== id);
-  selectedIds.delete(id);
-  renderAdminList();
-}
-
-function deleteSelected() {
-  if (selectedIds.size === 0) return;
-  if (!confirm('Delete ' + selectedIds.size + ' selected question(s)?')) return;
-  questions = questions.filter(q => !selectedIds.has(q.id));
-  selectedIds.clear();
-  renderAdminList();
-}
-
-// ════════════════════════════════════════════
-// ADD QUESTION
-// ════════════════════════════════════════════
-function addQuestion() {
-  const q    = document.getElementById('new-q').value.trim();
-  const ans  = document.getElementById('new-ans').value.trim();
-  const type = document.getElementById('new-type').value;
-  const o1   = document.getElementById('new-o1').value.trim();
-  const o2   = document.getElementById('new-o2').value.trim();
-  const o3   = document.getElementById('new-o3').value.trim();
-  const o4   = document.getElementById('new-o4').value.trim();
-  const fact = document.getElementById('new-fact').value.trim();
-
-  if (!q || !ans || !o1 || !o2) { alert('Question, answer, and at least 2 options are required.'); return; }
-
-  const opts = [o1, o2, o3, o4].filter(Boolean);
-  const id   = Date.now();
-  questions.push({ id, type, q, opts, ans, fact });
-  selectedIds.add(id);
-
-  // clear form
-  ['new-q','new-ans','new-o1','new-o2','new-o3','new-o4','new-fact'].forEach(id => document.getElementById(id).value = '');
-
-  const msg = document.getElementById('add-msg');
-  msg.style.display = 'inline';
-  setTimeout(() => msg.style.display = 'none', 2000);
-  renderAdminList();
-}
-
-// ════════════════════════════════════════════
-// GOOGLE SHEETS LOADER
-// ════════════════════════════════════════════
-/*
-  Expected sheet columns (row 1 = headers):
-  type | question | option_a | option_b | option_c | option_d | answer | fact
-*/
-let sheetsLoaded = false; // prevent loading twice without a new URL
-
-function toggleSheetsHelp() {
-  const el = document.getElementById('sheets-help');
-  const btn = document.querySelector('.btn-sm-link');
-  const open = el.style.display === 'block';
-  el.style.display = open ? 'none' : 'block';
-  btn.textContent = open ? 'How to set up your sheet ▾' : 'How to set up your sheet ▴';
-}
-
-function loadFromSheets() {
-  const url = document.getElementById('sheets-url').value.trim();
-  if (!url) { showMsg('Paste a Google Sheets published CSV URL first.', 'var(--red)'); return; }
-
-  // Prevent double-loading the same URL
-  if (sheetsLoaded) {
-    if (!confirm('Questions from this sheet are already loaded. Load again? This will add duplicate questions if the sheet hasn\'t changed.')) return;
-  }
-
-  const btn = document.getElementById('btn-load-sheets');
-  btn.textContent = 'Loading…';
-  btn.disabled = true;
-  showMsg('Fetching from Google Sheets…', 'var(--muted)');
-
-  fetch(url)
-    .then(r => {
-      if (!r.ok) throw new Error('Could not fetch. Make sure the sheet is published as CSV (File → Share → Publish to web → CSV).');
-      return r.text();
-    })
-    .then(csv => {
-      const rows = parseCSV(csv);
-      if (rows.length < 2) throw new Error('Sheet appears empty or has no data rows below the header row.');
-      const headers = rows[0].map(h => h.toLowerCase().trim());
-      const col = name => headers.indexOf(name);
-
-      // Validate required columns exist
-      const missing = ['type','question','option_a','option_b','answer'].filter(c => col(c) === -1);
-      if (missing.length) throw new Error('Missing required columns: ' + missing.join(', ') + '. Check your sheet headers match exactly.');
-
-      let added = 0, skipped = 0;
-      rows.slice(1).forEach(row => {
-        const type = (row[col('type')] || 'riddle').trim().toLowerCase();
-        const q    = (row[col('question')] || '').trim();
-        const ans  = (row[col('answer')]   || '').trim();
-        const fact = col('fact') >= 0 ? (row[col('fact')] || '').trim() : '';
-        const opts = ['option_a','option_b','option_c','option_d']
-          .map(c => col(c) >= 0 ? (row[col(c)] || '').trim() : '')
-          .filter(Boolean);
-        if (q && ans && opts.length >= 2) {
-          const id = Date.now() + added + Math.random();
-          questions.push({ id, type, q, opts, ans, fact });
-          selectedIds.add(id);
-          added++;
-        } else {
-          skipped++;
-        }
-      });
-
-      sheetsLoaded = true;
-      btn.textContent = '✓ Loaded';
-      btn.disabled = false;
-      const skipNote = skipped > 0 ? ` (${skipped} rows skipped — missing question, answer, or options)` : '';
-      showMsg('✓ Loaded ' + added + ' questions from Google Sheets!' + skipNote, 'var(--green)');
-      renderAdminList();
-    })
-    .catch(e => {
-      btn.textContent = 'Load';
-      btn.disabled = false;
-      showMsg('Error: ' + e.message, 'var(--red)');
-    });
-}
-
-function showMsg(text, colorVar) {
-  const msg = document.getElementById('sheets-msg');
-  msg.textContent = text;
-  msg.style.color = colorVar;
-  msg.style.display = 'block';
-}
-
-function parseCSV(text) {
-  const rows = [];
-  const lines = text.split('\n');
-  for (const line of lines) {
-    if (!line.trim()) continue;
-    const row = []; let cur = ''; let inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const ch = line[i];
-      if (ch === '"') { inQ = !inQ; }
-      else if (ch === ',' && !inQ) { row.push(cur.trim()); cur = ''; }
-      else { cur += ch; }
-    }
-    row.push(cur.trim());
-    rows.push(row);
-  }
-  return rows;
-}
-
-// Reset guard if URL changes
-document.addEventListener('DOMContentLoaded', () => {
-  const urlInput = document.getElementById('sheets-url');
-  if (urlInput) urlInput.addEventListener('input', () => {
-    sheetsLoaded = false;
-    document.getElementById('btn-load-sheets').textContent = 'Load';
-  });
-});
-
-// ════════════════════════════════════════════
-// INIT
-// ════════════════════════════════════════════
+function toggleSheetsHelp(){const el=document.getElementById('sheets-help'),open=el.style.display==='block';el.style.display=open?'none':'block';document.querySelector('.btn-sm-link').textContent=open?'How to set up your sheet ▾':'How to set up your sheet ▴';}
+function loadFromSheets(){const url=document.getElementById('sheets-url').value.trim();if(!url){showMsg('Paste a published CSV URL first.','var(--red)');return;}if(sheetsLoaded&&!confirm('Already loaded from this URL. Load again?'))return;const btn=document.getElementById('btn-load-sheets');btn.textContent='Loading…';btn.disabled=true;showMsg('Fetching…','var(--muted)');fetch(url).then(r=>{if(!r.ok)throw new Error('Could not fetch. Make sure sheet is published as CSV.');return r.text();}).then(csv=>{const rows=parseCSV(csv);if(rows.length<2)throw new Error('Sheet empty or no data rows.');const h=rows[0].map(x=>x.toLowerCase().trim()),col=n=>h.indexOf(n);const miss=['type','question','option_a','option_b','answer'].filter(c=>col(c)===-1);if(miss.length)throw new Error('Missing columns: '+miss.join(', '));let added=0,skipped=0;rows.slice(1).forEach(row=>{const type=(row[col('type')]||'riddle').trim().toLowerCase(),q=(row[col('question')]||'').trim(),ans=(row[col('answer')]||'').trim(),fact=col('fact')>=0?(row[col('fact')]||'').trim():'',opts=['option_a','option_b','option_c','option_d'].map(c=>col(c)>=0?(row[col(c)]||'').trim():'').filter(Boolean);if(q&&ans&&opts.length>=2){const id=Date.now()+added+Math.random();questions.push({id,type,q,opts,ans,fact});selectedIds.add(id);added++;}else skipped++;});sheetsLoaded=true;btn.textContent='✓ Loaded';btn.disabled=false;showMsg('✓ Loaded '+added+' questions'+(skipped?' ('+skipped+' skipped)':''),'var(--green)');renderAdminList();}).catch(e=>{btn.textContent='Load';btn.disabled=false;showMsg('Error: '+e.message,'var(--red)');});}
+function showMsg(t,c){const el=document.getElementById('sheets-msg');el.textContent=t;el.style.color=c;el.style.display='block';}
+function parseCSV(text){const rows=[];for(const line of text.split('\n')){if(!line.trim())continue;const row=[];let cur='',inQ=false;for(const ch of line){if(ch==='"')inQ=!inQ;else if(ch===','&&!inQ){row.push(cur.trim());cur='';}else cur+=ch;}row.push(cur.trim());rows.push(row);}return rows;}
+document.addEventListener('DOMContentLoaded',()=>{const u=document.getElementById('sheets-url');if(u)u.addEventListener('input',()=>{sheetsLoaded=false;document.getElementById('btn-load-sheets').textContent='Load';});});
 updateTeamNames();
 </script>
 </body>
