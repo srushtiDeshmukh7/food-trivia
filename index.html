@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>🍛 Food Fight Trivia</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@500&display=swap" rel="stylesheet">
 <style>
   /* ── RESET & BASE ── */
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -88,12 +88,12 @@
   .team-score.team-b { border-color: var(--nz); background: var(--nz-dim); text-align: right; }
   .team-score .label { font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; opacity: .7; margin-bottom: 2px; }
   .team-score .pts {
-    font-family: 'Syne', sans-serif;
-    font-size: 42px;
-    font-weight: 800;
+    font-family: 'DM Mono', 'Courier New', monospace;
+    font-size: 48px;
+    font-weight: 500;
     display: block;
-    line-height: 1.1;
-    letter-spacing: -1px;
+    line-height: 1;
+    letter-spacing: -2px;
     white-space: nowrap;
     writing-mode: horizontal-tb;
     text-orientation: mixed;
@@ -271,7 +271,7 @@
   #game-over .fs-team { padding: 20px 36px; border-radius: var(--radius-lg); }
   #game-over .fs-team.a { background: var(--aus-dim); border: 1px solid var(--aus); }
   #game-over .fs-team.b { background: var(--nz-dim);  border: 1px solid var(--nz); }
-  #game-over .fs-pts { font-family: 'Syne', sans-serif; font-size: 48px; font-weight: 800; display: block; line-height: 1.1; letter-spacing: -1px; }
+  #game-over .fs-pts { font-family: 'DM Mono', 'Courier New', monospace; font-size: 52px; font-weight: 500; display: block; line-height: 1; letter-spacing: -2px; }
   #game-over .fs-team.a .fs-pts { color: var(--aus); }
   #game-over .fs-team.b .fs-pts { color: var(--nz); }
   #game-over .fs-label { font-size: 14px; color: var(--muted); margin-top: 4px; }
@@ -416,13 +416,14 @@
   /* team name inputs in quiz setup */
   .setup-bar {
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr auto;
     gap: 12px;
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     padding: 16px;
     margin-bottom: 20px;
+    align-items: end;
   }
   .setup-bar .form-group label { font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
 
@@ -434,6 +435,20 @@
     font-size: 15px;
   }
   .empty-state .big { font-size: 40px; margin-bottom: 12px; display: block; }
+
+  /* time expired prompt */
+  .time-up-box {
+    padding: 14px 18px;
+    background: #2e1a0a;
+    border: 1px solid var(--red);
+    border-radius: var(--radius);
+    margin-bottom: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .time-up-icon { font-size: 22px; }
+  .time-up-text { font-size: 15px; font-weight: 600; color: var(--red); }
 
   /* scrollbar */
   ::-webkit-scrollbar { width: 6px; }
@@ -454,7 +469,7 @@
 ══════════════════════════════════════════ -->
 <div class="page active" id="page-quiz">
 
-  <!-- Team name setup -->
+  <!-- Team name + timer setup -->
   <div class="setup-bar">
     <div class="form-group">
       <label>🟠 Team A name</label>
@@ -463,6 +478,17 @@
     <div class="form-group">
       <label>🟢 Team B name</label>
       <input type="text" id="team-b-name" value="New Zealand" maxlength="20" oninput="updateTeamNames()">
+    </div>
+    <div class="form-group">
+      <label>⏱ Timer per question</label>
+      <select id="timer-duration">
+        <option value="10">10 seconds</option>
+        <option value="15" selected>15 seconds</option>
+        <option value="20">20 seconds</option>
+        <option value="30">30 seconds</option>
+        <option value="45">45 seconds</option>
+        <option value="0">No timer</option>
+      </select>
     </div>
   </div>
 
@@ -517,6 +543,16 @@
     </div>
 
     <div class="options-grid" id="options-grid"></div>
+
+    <!-- Time expired prompt — shown when timer runs out -->
+    <div id="time-up-box" style="display:none" class="time-up-box">
+      <span class="time-up-icon">⏰</span>
+      <span class="time-up-text">Time's up! What do you want to do?</span>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn btn-reveal" onclick="revealAnswer()">💡 Reveal answer</button>
+        <button class="btn" style="color:var(--muted)" onclick="skipQuestion()">Skip — no point</button>
+      </div>
+    </div>
 
     <div class="fact-box" id="fact-box"></div>
 
@@ -778,6 +814,7 @@ function nextQuestion() {
   // hide/show elements
   document.getElementById('fact-box').style.display = 'none';
   document.getElementById('fact-box').innerHTML = '';
+  document.getElementById('time-up-box').style.display = 'none';
   document.getElementById('btn-reveal').style.display = 'inline-block';
   document.getElementById('btn-next').style.display = 'none';
   document.getElementById('btn-award-a').style.display = 'none';
@@ -855,11 +892,17 @@ function awardPoint(team) {
 }
 
 function skipQuestion() {
-  // No point awarded — just move on
+  stopTimer();
+
+  // hide UI
   document.getElementById('btn-award-a').disabled = true;
   document.getElementById('btn-award-b').disabled = true;
   document.getElementById('btn-skip').style.display = 'none';
-  document.getElementById('btn-next').style.display = 'inline-block';
+  document.getElementById('time-up-box').style.display = 'none';
+  document.getElementById('btn-next').style.display = 'none';
+
+  // immediately go to next question
+  nextQuestion();
 }
 
 function updateProgress() {
@@ -908,23 +951,53 @@ function restartGame() {
 // ════════════════════════════════════════════
 // TIMER
 // ════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════
+function getTimerDuration() {
+  return parseInt(document.getElementById('timer-duration').value, 10);
+}
+
 function startTimer() {
-  timeLeft = 15;
+  const duration = getTimerDuration();
+
+  // Hide time-up box from previous question
+  document.getElementById('time-up-box').style.display = 'none';
+
+  if (duration === 0) {
+    // No timer mode — hide the timer row entirely
+    document.getElementById('timer-row').style.display = 'none';
+    return;
+  }
+
+  timeLeft = duration;
   document.getElementById('timer-row').style.display = 'flex';
   updateTimerDisplay();
   clearInterval(timerInterval);
   timerInterval = setInterval(() => {
     timeLeft--;
     updateTimerDisplay();
-    if (timeLeft <= 0) { stopTimer(); showRevealUI(); }
+    if (timeLeft <= 0) {
+      stopTimer();
+      onTimerExpired();
+    }
   }, 1000);
+}
+
+function onTimerExpired() {
+  // Disable options so nobody can click after time runs out
+  document.querySelectorAll('.opt-btn').forEach(b => b.disabled = true);
+  // Show the "reveal or skip?" prompt — presenter decides
+  document.getElementById('time-up-box').style.display = 'flex';
+  // Hide the reveal button (it's now in the time-up box)
+  document.getElementById('btn-reveal').style.display = 'none';
 }
 
 function stopTimer() { clearInterval(timerInterval); }
 
 function updateTimerDisplay() {
   document.getElementById('timer-val').textContent = timeLeft;
-  const pct = (timeLeft / 15) * 100;
+  const duration = getTimerDuration() || 15;
+  const pct = (timeLeft / duration) * 100;
   const bar  = document.getElementById('timer-bar');
   const ring = document.getElementById('timer-ring');
   bar.style.width = pct + '%';
